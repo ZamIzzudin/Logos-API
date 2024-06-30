@@ -1,7 +1,9 @@
 /** @format */
 
 import express from "express";
-import controller from "../controllers/scrape.js";
+import user from "./user.js";
+import scrape from "./scrape.js";
+import util from "./util-user.js";
 
 const router = express.Router();
 
@@ -13,7 +15,9 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/data", controller.get_data);
+router.use("/auth", user);
+router.use("/scrape", scrape);
+router.use("/user", util);
 
 router.get("*", (req, res) => {
   res.send({
