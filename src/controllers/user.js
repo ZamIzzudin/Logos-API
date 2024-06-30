@@ -186,21 +186,6 @@ const register = async (req, res) => {
   }
 };
 
-// const name = async (req,res) => {
-//     try{
-//         return res.status(200).json({
-//             status: 200,
-//             message: "STATUS"
-//         })
-//     }catch(err){
-//         return res.status(500).json({
-//             status: 500,
-//             message: 'failed',
-//             info: 'server error'
-//         })
-//     }
-// }
-
 const controller = {
   login,
   refresh,
