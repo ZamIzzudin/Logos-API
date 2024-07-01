@@ -24,7 +24,7 @@ const update_config = async (req, res) => {
       kbli,
     };
 
-    const user = await User.updateOne({ _id: id }, { config: payload });
+    const user = await User.findOneAndUpdate({ _id: id }, { config: payload });
 
     return res.status(200).json({
       status: 200,
