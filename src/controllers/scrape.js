@@ -56,8 +56,34 @@ const get_data = async (req, res) => {
   }
 };
 
+const get_instansi = async (req, res) => {
+  const data = await Scrape.find({}, { instansi: true });
+
+  const filtered_instansi = [];
+
+  data.forEach((each) => {
+    if (!filtered_instansi.includes(each.instansi)) {
+      filtered_instansi.push(each.instansi);
+    }
+  });
+
+  if (data.length > 0) {
+    return res.status(200).json({
+      status: 200,
+      message: "Success Get Scrape Data List",
+      data: filtered_instansi,
+    });
+  } else {
+    return res.status(500).json({
+      status: 500,
+      message: "Data Not Found",
+    });
+  }
+};
+
 const controller = {
   get_data,
+  get_instansi,
 };
 
 export default controller;
