@@ -4,6 +4,7 @@ import Scrape from "../models/scrape.js";
 import User from "../models/user.js";
 import dateFormater from "../utils/local_time.js";
 import email_template from "../utils/email_template.js";
+import { uid } from "uid";
 
 const update_config = async (req, res) => {
   const {
@@ -163,17 +164,20 @@ const update_records = async (req, res) => {
   }
 };
 
-const setup_notification = async (data, step, type) => {
-  let message = {};
+const setup_notification = (user, data, step, type) => {
+  let payload = {};
+  const id = uid(16);
   if (type === "mulai") {
-    message = {
+    payload = {
+      id,
       title: `${data.nama_tender} - ${data.kode_tender}`,
       message: `Pengingat: ${step.tahap} akan Mulai Pada Tanggal ${step.mulai}`,
       is_read: false,
       date_added: dateFormater.get_local_time(),
     };
   } else {
-    message = {
+    payload = {
+      id,
       title: `${data.nama_tender} - ${data.kode_tender}`,
       message: `Pengingat: ${step.tahap} akan Selesai Pada Tanggal ${step.sampai}`,
       is_read: false,
@@ -181,9 +185,9 @@ const setup_notification = async (data, step, type) => {
     };
   }
 
-  email_template();
+  email_template(user, data, step, type);
 
-  return message;
+  return payload;
 };
 
 const generate_notification = async (req, res) => {
@@ -193,33 +197,36 @@ const generate_notification = async (req, res) => {
     const now = dateFormater.get_local_time();
 
     users.forEach(async (user) => {
-      const user_records_list = user.record;
+      const user_archives_list = user.archive;
 
       let new_notification = user.notification;
 
-      const records = await Scrape.find({
-        kode_tender: { $in: user_records_list },
+      const archives = await Scrape.find({
+        kode_tender: { $in: user_archives_list },
       });
 
-      records.forEach((record) => {
-        const steps = record.tahapan_tender;
+      archives.forEach((archive) => {
+        const steps = archive.tahapan_tender;
 
         steps.forEach((step) => {
           const mulai = step.mulai.split(" ").slice(0, 3).join(" ");
           const sampai = step.sampai.split(" ").slice(0, 3).join(" ");
 
-          if (mulai === "5 Juli 2024") {
-            new_notification.push(setup_notification(record, step, "mulai"));
+          if (mulai === now) {
+            new_notification.push(
+              setup_notification(user, archive, step, "mulai")
+            );
           }
 
-          if (sampai === "5 Juli 2024") {
-            new_notification.push(setup_notification(record, step, "sampai"));
+          if (sampai === now) {
+            new_notification.push(
+              setup_notification(user, archive, step, "sampai")
+            );
           }
         });
       });
-      console.log(new_notification);
 
-      // await User.updateOne({ _id: user.id, notification: new_notification });
+      await User.updateOne({ _id: user.id, notification: new_notification });
     });
 
     return res.status(200).json({

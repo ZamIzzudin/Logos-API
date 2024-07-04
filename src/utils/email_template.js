@@ -1,13 +1,13 @@
 /** @format */
 import email_service from "../config/nodemailer.js";
 
-const email_template = async () => {
+const email_template = async (user, data, step, type) => {
   const config = {
     from: {
       name: "Logos App",
       address: "vzeinternal@gmail.com",
     }, // sender address
-    to: ["loloklolok14@gmail.com"], // list of receivers
+    to: [user.email], // list of receivers
     subject: "Notification Reminder", // Subject line
     html: `<!DOCTYPE html>
         <html lang="en">

@@ -56,6 +56,7 @@ const login = async (req, res) => {
             archive: user.archive,
             record: user.record,
             notification: user.notification,
+            email: user.email,
           },
           access_token,
         });
@@ -128,7 +129,7 @@ const refresh = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { password, username } = req.body;
+  const { password, username, email } = req.body;
 
   try {
     //check duplicated username
@@ -147,6 +148,7 @@ const register = async (req, res) => {
         username,
         password: encrypted_password,
         config: temp_config,
+        email,
       });
 
       if (new_user) {
@@ -172,6 +174,7 @@ const register = async (req, res) => {
             archive: new_user.archive,
             record: new_user.record,
             notification: new_user.notification,
+            email: new_user.email,
           },
           access_token,
         });

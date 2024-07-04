@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 const user_scheme = new mongoose.Schema({
   username: String,
   password: String,
+  email: String,
   config: {
     type: Object,
     default: {},
