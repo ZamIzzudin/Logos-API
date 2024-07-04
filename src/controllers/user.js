@@ -9,7 +9,7 @@ const temp_config = {
   jenis_proyek: ["Pekerjaan Konstruksi"],
   lokasi_proyek: [],
   nilai_proyek: { min: 15000000000, max: 20000000000 },
-  hbu: null,
+  sbu: null,
   kbli: null,
 };
 

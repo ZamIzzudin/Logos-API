@@ -6,6 +6,34 @@ import dateFormater from "../utils/local_time.js";
 import email_template from "../utils/email_template.js";
 import { uid } from "uid";
 
+const get_config = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findOne({ _id: id });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: "failed",
+        info: "User Not Found",
+      });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: "Success Get User Config",
+      config: user.config,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: 500,
+      message: "failed",
+      info: "server error",
+    });
+  }
+};
+
 const update_config = async (req, res) => {
   const {
     penyelenggara_proyek,
@@ -309,6 +337,7 @@ const read_notification = async (req, res) => {
 };
 
 const controller = {
+  get_config,
   update_config,
   get_archives,
   update_archives,

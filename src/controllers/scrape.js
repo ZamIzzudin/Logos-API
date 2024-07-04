@@ -18,8 +18,8 @@ const get_data = async (req, res) => {
       if (filter.jenis_proyek) {
         payload.jenis_pengadaan = { $in: filter.jenis_proyek };
       }
-      if (filter.hbu) {
-        payload.kode_hbu = { $in: filter.hbu };
+      if (filter.sbu) {
+        payload.kode_sbu = { $in: filter.sbu };
       }
       if (filter.kbli) {
         payload.kode_kbli = { $in: filter.kbli };

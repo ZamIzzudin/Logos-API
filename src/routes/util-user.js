@@ -7,6 +7,7 @@ import controller from "../controllers/util-user.js";
 const util = express.Router();
 
 // GET
+util.get("/config/:id", controller.get_config);
 util.get("/archive/:id", controller.get_archives);
 util.get("/record/:id", controller.get_records);
 util.get("/gnrt-ntf", controller.generate_notification);
