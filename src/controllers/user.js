@@ -4,6 +4,15 @@ import User from "../models/user.js";
 import crypting from "../libs/crypt.js";
 import token from "../libs/jwt.js";
 
+const temp_config = {
+  penyelenggara_proyek: ["Provinsi DKI Jakarta"],
+  jenis_proyek: ["Pekerjaan Konstruksi"],
+  lokasi_proyek: [],
+  nilai_proyek: { min: 15000000000, max: 20000000000 },
+  hbu: null,
+  kbli: null,
+};
+
 const login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -137,6 +146,7 @@ const register = async (req, res) => {
       const new_user = await User.create({
         username,
         password: encrypted_password,
+        config: temp_config,
       });
 
       if (new_user) {
@@ -151,8 +161,6 @@ const register = async (req, res) => {
           secure: true,
           sameSite: "none",
         });
-
-        const { password, ...show_data } = new_user;
 
         return res.status(201).json({
           status: 201,

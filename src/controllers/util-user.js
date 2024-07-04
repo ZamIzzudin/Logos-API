@@ -2,6 +2,8 @@
 
 import Scrape from "../models/scrape.js";
 import User from "../models/user.js";
+import dateFormater from "../utils/local_time.js";
+import email_template from "../utils/email_template.js";
 
 const update_config = async (req, res) => {
   const {
@@ -161,12 +163,153 @@ const update_records = async (req, res) => {
   }
 };
 
+const setup_notification = async (data, step, type) => {
+  let message = {};
+  if (type === "mulai") {
+    message = {
+      title: `${data.nama_tender} - ${data.kode_tender}`,
+      message: `Pengingat: ${step.tahap} akan Mulai Pada Tanggal ${step.mulai}`,
+      is_read: false,
+      date_added: dateFormater.get_local_time(),
+    };
+  } else {
+    message = {
+      title: `${data.nama_tender} - ${data.kode_tender}`,
+      message: `Pengingat: ${step.tahap} akan Selesai Pada Tanggal ${step.sampai}`,
+      is_read: false,
+      date_added: dateFormater.get_local_time(),
+    };
+  }
+
+  email_template();
+
+  return message;
+};
+
+const generate_notification = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    const now = dateFormater.get_local_time();
+
+    users.forEach(async (user) => {
+      const user_records_list = user.record;
+
+      let new_notification = user.notification;
+
+      const records = await Scrape.find({
+        kode_tender: { $in: user_records_list },
+      });
+
+      records.forEach((record) => {
+        const steps = record.tahapan_tender;
+
+        steps.forEach((step) => {
+          const mulai = step.mulai.split(" ").slice(0, 3).join(" ");
+          const sampai = step.sampai.split(" ").slice(0, 3).join(" ");
+
+          if (mulai === "5 Juli 2024") {
+            new_notification.push(setup_notification(record, step, "mulai"));
+          }
+
+          if (sampai === "5 Juli 2024") {
+            new_notification.push(setup_notification(record, step, "sampai"));
+          }
+        });
+      });
+      console.log(new_notification);
+
+      // await User.updateOne({ _id: user.id, notification: new_notification });
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Success Create New Notification",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: 500,
+      message: err.message,
+    });
+  }
+};
+
+const get_notification = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findOne({ _id: id });
+    const notification_list = user.notification;
+
+    const unreaded_notification = notification_list.filter(
+      (notification) => !notification.is_read
+    );
+
+    if (notification_list === undefined || notification_list.length === 0) {
+      return res.status(200).json({
+        status: 200,
+        message: "Success Get User Notification List",
+        unreaded: 0,
+        notification: [],
+      });
+    } else {
+      return res.status(200).json({
+        status: 200,
+        message: "Success Get User Notification List",
+        unreaded: unreaded_notification.length,
+        notification: notification_list,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      status: 500,
+      message: "failed",
+      info: "server error",
+    });
+  }
+};
+
+const read_notification = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findOne({ _id: id });
+    const notification_list = user.notification;
+
+    const payload = notification_list.map((notification) => {
+      return { ...notification, is_read: true };
+    });
+
+    const updated_user = await User.findOneAndUpdate(
+      { _id: id },
+      { notification: payload }
+    );
+
+    return res.status(200).json({
+      status: 200,
+      message: "Success Update Notification Status",
+      notification: updated_user.notification,
+      unreaded: 0,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      status: 500,
+      message: "failed",
+      info: "server error",
+    });
+  }
+};
+
 const controller = {
   update_config,
   get_archives,
   update_archives,
   get_records,
   update_records,
+  generate_notification,
+  get_notification,
+  read_notification,
 };
 
 export default controller;
